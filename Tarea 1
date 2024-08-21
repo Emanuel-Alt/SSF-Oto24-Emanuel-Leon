@@ -1,0 +1,79 @@
+# Trabajo 1: Metodos de simplificaciones.
+
+a) Usando el ejemplo que vimos en clase, horner.py, implementar las variantes dadas en Bendersky's website. Probar con 2-3 ejemplos..
+b) Implementar la evaluación de cos(x) mediante. 
+  i) el cálculo de la serie directa. 
+  ii) computación parcial. Comparar la convergencia de las evaluaciones, para ello generar una tabla con encabezados: x
+  iteración, suma, |suma-cos(x)|/cos(x), en donde cos(x) es el valor obtenido con la función directamente. 
+La última columna es el error relativo de su aproximación. Haga una tabla para cada i) y ii). Comience con una tolerancia de 10^4. 
+Repita con una tolerancia de 10^8. Compare. Muestre que para valores suficientemente pequeños de x, el algoritmo converge y a la respuesta correcta. 
+Muestre que para valores grandes de x (~ 100), el algoritmo no converge. c) Datos de estrellas: usando el programa hrdiagram.py y los datos de stars.dat, reproducir la gráfica. Graficar con y sin pylab. d) Datos de alturas de hombres mexicanos (A, B). Mostrar los datos gráficamente. (como uds crean que sea lo mejor).
+
+## Instalación
+
+Instrucciones para instalar y configurar el proyecto:
+
+```bash
+git clone https://github.com/TU_USUARIO/TU_REPOSITORIO.git
+cd TU_REPOSITORIO
+# otros comandos de instalación
+
+import math
+
+def cos_taylor_direct(x, tolerance):
+    """Calcula cos(x) usando la serie de Taylor directamente hasta que el término adicional sea menor que la tolerancia."""
+    sum_cos = 1.0  # Primer término de la serie
+    term = 1.0
+    n = 1
+
+    results = []
+
+    while abs(term) > tolerance:
+        term = ((-1)**n) * (x**(2*n)) / math.factorial(2*n)
+        sum_cos += term
+        relative_error = abs(sum_cos - math.cos(x)) / abs(math.cos(x))
+        results.append((n, sum_cos, relative_error))
+        n += 1
+
+    return results
+
+
+def cos_taylor_partial(x, tolerance):
+    """Calcula cos(x) usando la serie de Taylor con computación parcial (optimizando el cálculo)."""
+    sum_cos = 1.0  # Primer término de la serie
+    term = 1.0
+    n = 1
+
+    results = []
+
+    while abs(term) > tolerance:
+        term *= -x**2 / ((2*n - 1) * (2*n))  # Usa el término anterior para calcular el nuevo
+        sum_cos += term
+        relative_error = abs(sum_cos - math.cos(x)) / abs(math.cos(x))
+        results.append((n, sum_cos, relative_error))
+        n += 1
+
+    return results
+
+def print_results(results, method_name):
+    print(f"Results for {method_name}:")
+    print(f"{'Iteration':<10}{'Sum':<20}{'Relative Error':<20}")
+    print("-" * 50)
+    for n, sum_cos, relative_error in results:
+        print(f"{n:<10}{sum_cos:<20}{relative_error:<20}")
+    print("\n")
+
+# Prueba con diferentes valores de x y tolerancias
+x_values = [0.1, 1, 10, 100]
+tolerances = [1e-4, 1e-8]
+
+for x in x_values:
+    for tol in tolerances:
+        print(f"Evaluating cos({x}) with tolerance {tol}:\n")
+
+        direct_results = cos_taylor_direct(x, tol)
+        partial_results = cos_taylor_partial(x, tol)
+
+        print_results(direct_results, "Direct Series")
+        print_results(partial_results, "Partial Computation")
+
